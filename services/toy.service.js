@@ -1,86 +1,103 @@
+import fs from 'fs'
+import { utilService } from './util.service.js'
 
-const fs = require('fs')
-const toys = require('../data/toy.json')
+const toys = utilService.readJsonFile('../data/toy.json')
 
-module.exports = {
+
+export const toyService = {
     query,
-    getById,
+    get,
     save,
-    remove
+    remove,
+
+
 }
 
-function query(filterBy, sort) {
-    if (!filterBy) return Promise.resolve(toys)
 
-    let filteredToys = toys
-    if (filterBy.search) {
+function query(filterBy = {}) {
+    console.log('hi');
+
+    let toyToDisplay = toys
+    console.log('toyToDisplay txt', toyToDisplay)
+
+    if (filterBy.txt) {
         const regExp = new RegExp(filterBy.txt, 'i')
-        filteredToys = filteredToys.filter(toy => regExp.test(toy.name))
+        toyToDisplay = toyToDisplay.filter(toy => regExp.test(toy.name))
+        console.log('toyToDisplay txt', toyToDisplay)
     }
-    if (filterBy.labels && filterBy.labels[0]) {
-        filteredToys = filteredToys.filter(toy => toy.labels.some(label => filterBy.labels.includes(label)))
+    if (filterBy.inStock !== undefined) {
+        if (filterBy.inStock === true) {
+            toyToDisplay = toyToDisplay.filter(toy => toy.inStock === true)
+        } else if (filterBy.inStock === false) {
+            toyToDisplay = toyToDisplay.filter(toy => toy.inStock === false)
+        }
+    }
+    if (filterBy.labels && filterBy.labels.length > 0) {
+        toyToDisplay = toyToDisplay.filter(toy => {
+            return toy.labels.some(label => filterBy.labels.includes(label));
+        });
     }
 
-    if (filterBy.inStock) { 
-        filteredToys = filteredToys.filter(toy => toy.inStock === JSON.parse(filterBy.inStock))
-    }
 
-    filterBy.maxPrice = (+filterBy.maxPrice) ? +filterBy.maxPrice : Infinity
-    filterBy.minPrice = (+filterBy.minPrice) ? +filterBy.minPrice : -Infinity
-
-    filteredToys = filteredToys.filter(toy => (toy.price <= filterBy.maxPrice) && (toy.price >= filterBy.minPrice))
-
-
-    // sort either by price or by name - when sorting by string we need more 
-    // complex conditions, thats for you to figure out ;)
-    // we use the asc key in the sort to determin which way to sort
-    // ascending or descending. so when we change the number to pos \ neg 
-    // it will change the direction of the sort
-    filteredToys.sort((toy1, toy2) => {
-        const dir = JSON.parse(sort.asc) ? 1 : -1
-        if (sort.by === 'price') return (toy1.price - toy2.price) * dir
-        if (sort.by === 'name') return toy1.name.localeCompare(toy2.name) * dir
-    })
-
-    return Promise.resolve(filteredToys);
+    return Promise.resolve(toyToDisplay)
 }
 
-function getById(_id) {
-    const toy = toys.find(toy => toy._id === _id)
-    return Promise.resolve(toy);
+
+
+function get(toyId) {
+    const toy = toys.find(toy => toy._id === toyId);
+    if (!toy) return Promise.reject('Toy not found')
+    return Promise.resolve(toy)
 }
 
-function remove(_id) {
-    const idx = toys.findIndex(toy => toy._id === _id)
-    toys.splice(idx, 1);
-    _saveToysToFile()
-    return Promise.resolve();
+
+
+function remove(toyId) {
+    const idx = toys.findIndex(toy => toy._id === toyId);
+    if (idx === -1) return Promise.reject('no such toy')
+    toys.splice(idx, 1)
+    // return Promise.reject('Not now!')
+    return _saveToysToFile()
 }
+
+
+
 
 function save(toy) {
     if (toy._id) {
-        const idx = toys.findIndex(currToy => currToy._id === toy._id)
-        toys[idx] = { ...toys[idx], ...toy }
+        const toyToUpdate = toys.find(currToy => currToy._id === toy._id)
+        toyToUpdate.price = toy.price
     } else {
-        toy.createdAt = new Date(Date.now());
-        toy._id = _makeId();
-        toys.unshift(toy);
+        toy._id = utilService.makeId()
+        toys.push(toy)
     }
-    _saveToysToFile();
-    return Promise.resolve(toy);
+    return _saveToysToFile().then(() => toy)
 }
 
 
 
-function _makeId(length = 5) {
-    var txt = '';
-    var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    for (var i = 0; i < length; i++) {
-        txt += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
-    return txt;
-}
+
+// function getDefaultFilter() {
+//     return { txt: '', labels: [], inStock: undefined, pageIdx: 0 };
+// }
+
+
+
 
 function _saveToysToFile() {
-    fs.writeFileSync('data/toy.json', JSON.stringify(toys, null, 2));
+    return new Promise((resolve, reject) => {
+
+        const toysStr = JSON.stringify(toys, null, 4)
+        fs.writeFile('data/toy.json', toysStr, (err) => {
+            if (err) {
+                return console.log(err);
+            }
+            console.log('The file was saved!');
+            resolve()
+        });
+    })
 }
+
+// TEST DATA
+// storageService.post(STORAGE_KEY, {vendor: 'Subali Rahok 6', price: 980}).then(x => console.log(x))
+

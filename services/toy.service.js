@@ -4,9 +4,6 @@ import { utilService } from './util.service.js'
 const toys = utilService.readJsonFile('data/toy.json')
 
 
-
-
-
 export const toyService = {
     query,
     get,
@@ -15,8 +12,6 @@ export const toyService = {
 
 
 }
-
-
 
 
 function query(filterBy = {}) {

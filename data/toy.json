@@ -1,0 +1,92 @@
+[
+    {
+      "_id": "t101",
+      "name": "Talking Doll",
+      "price": 70,
+      "labels": [
+        "Doll",
+        "Battery Powered",
+        "Baby"
+      ],
+      "inStock": true,
+      "img": "2.jpg"
+    },
+    {
+      "_id": "t103",
+      "name": "Colorful Puzzle Blocks",
+      "price": 113,
+      "labels": [
+        "Puzzle",
+        "Art"
+      ],
+      "inStock": true,
+      "img": "3.jpg"
+    },
+    {
+      "name": "shoki",
+      "price": 144,
+      "inStock": true,
+      "labels": [],
+      "createdAt": 1684849127589,
+      "_id": "oZqVq",
+      "img": "1.jpg"
+    },
+    {
+      "name": "Shorty",
+      "price": 50,
+      "inStock": true,
+      "labels": [],
+      "createdAt": 1685095985452,
+      "img": "6.jpg",
+      "_id": "YSjgL"
+    },
+    {
+      "name": "Shubi the talking dog",
+      "price": 40,
+      "inStock": true,
+      "labels": [],
+      "createdAt": 1685096196520,
+      "img": "5.jpg",
+      "_id": "vZtL1"
+    },
+    {
+      "name": "Talking Teddy Bear",
+      "price": 9,
+      "inStock": true,
+      "labels": [],
+      "createdAt": 1685096387438,
+      "img": "4.png",
+      "_id": "bVglZ"
+    },
+    {
+      "name": "Card Game ",
+      "price": 12,
+      "inStock": true,
+      "labels": [],
+      "createdAt": 1685178176970,
+      "img": "6.jpg",
+      "_id": "15E6e"
+    },
+    {
+      "name": "shuki",
+      "price": 11,
+      "inStock": true,
+      "labels": [],
+      "createdAt": 1685192592038,
+      "img": "6.jpg",
+      "_id": "tyQwU"
+    },
+    {
+      "name": "Board Game",
+      "price": 37,
+      "inStock": true,
+      "labels": [
+        "Doll",
+        "Puzzle",
+        "Outdoor"
+      ],
+      "createdAt": 1685197279028,
+      "img": "6.jpg",
+      "_id": "3TuRj"
+    }
+  ]

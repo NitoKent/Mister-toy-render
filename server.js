@@ -1,118 +1,52 @@
-import path, { dirname } from 'path';
-import { fileURLToPath } from 'url';
 import express from 'express'
-import cors from 'cors'
 import cookieParser from 'cookie-parser'
-import { loggerService } from './services/logger.service.js'
-import { toyService } from './services/toy.service.js'
+import cors from 'cors'
+import path, { dirname } from 'path'
+import { fileURLToPath } from 'url'
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+import { logger } from './services/logger.service.js'
+logger.info('server.js loaded...')
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(fileURLToPath(import.meta.url))
+
 const app = express()
 
-const corsOptions = {
-    origin: [
-        'http://127.0.0.1:8080',
-        'http://localhost:8080',
-        'http://127.0.0.1:5173',
-        'http://localhost:5173',
-    ],
-    credentials: true
-}
 
-app.use(cors(corsOptions))
-app.use(cookieParser()) // for res.cookies
-app.use(express.json()) // for req.body
+app.use(cookieParser())
+app.use(express.json())
 app.use(express.static('public'))
 
+// App Configuration
+if (process.env.NODE_ENV === 'production') {
 
+	app.use(express.static(path.resolve(__dirname, 'public')))
+	console.log('__dirname: ', __dirname)
+} else {
+	// Configuring CORS
+	const corsOptions = {
+	
+		origin: ['http://127.0.0.1:8080', 'http://localhost:8080', 'http://127.0.0.1:5173', 'http://localhost:5173'],
+		credentials: true,
+	}
+	app.use(cors(corsOptions))
+}
 
-//List
-app.get('/api/toy', (req, res) => {
-    const { txt, labels, inStock, pageIdx} = req.query
-    const filterBy = { txt, labels,inStock, pageIdx }
-    toyService.query(filterBy)
-        .then(toys => {
-            res.send(toys)
-        })
-        .catch(err => {
-            loggerService.error('Cannot load toys', err)
-            res.status(400).send('Cannot load toys')
-        })
-})
-//add
-app.post('/api/toy', (req, res) => {
-    const { txt:name, labels, inStock } = req.body
-    const toy = {
-        name,
-        labels,
-        inStock,
-    }
-    toyService.save(toy)
-        .then(savedToy => {
-            res.send(savedToy)
-        })
-        .catch(err => {
-            loggerService.error('Cannot add toy', err)
-            res.status(400).send('Cannot add toy')
-        })
-})
-///edit
-app.put('/api/toy', (req, res) => {
-   
+import { authRoutes } from './api/auth/auth.routes.js'
+import { userRoutes } from './api/user/user.routes.js'
+import { toyRoutes } from './api/toy/toy.routes.js'
 
-    const {_id,name,labels,price,createdAt,inStock } = req.body
-    const toy = {
-        _id,
-        name,
-        labels,
-        price,
-        createdAt,
-        inStock
-    }
-    toyService.save(toy)
-    .then(savedToy => {
-        res.send(savedToy)
-    })
-    .catch(err => {
-        loggerService.error('Cannot add toy', err)
-        res.status(400).send('Cannot add toy')
-    })
-})
+// routes
+app.use('/api/auth', authRoutes)
+app.use('/api/user', userRoutes)
+app.use('/api/toy', toyRoutes)
 
-// Read - getById
-app.get('/api/toy/:toyId', (req, res) => {
-    const { toyId } = req.params
-    toyService.get(toyId)
-        .then(toy => {
-            // toy.msgs =['HEllo']
-            res.send(toy)
-        })
-        .catch(err => {
-            loggerService.error('Cannot get toy', err)
-            res.status(400).send(err)
-        })
-})
-
-// Remove
-app.delete('/api/toy/:toyId', (req, res) => {
-    const { toyId } = req.params
-    toyService.remove(toyId)
-        .then(msg => {
-            res.send({ msg, toyId })
-        })
-        .catch(err => {
-            loggerService.error('Cannot delete toy', err)
-            res.status(400).send('Cannot delete toy, ' + err)
-        })
-})
 app.get('/**', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'))
+	res.sendFile(path.resolve('public/index.html'))
 })
 
-
-
-// Listen will always be the last line in our server!
 const port = process.env.PORT || 3030
+
 app.listen(port, () => {
-    loggerService.info(`Server listening on port http://127.0.0.1:${port}/`)
-})
+    logger.info('Server is running on port: ' + port)
+  })
